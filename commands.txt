@@ -1,0 +1,11 @@
+npm init -y
+npm i nodemon
+npm i express
+npm i ejs 
+npm i mongoose
+add "type":"module" in package.json for using import alias 
+mongosh -> to initiate mongodb in terminal 
+dbs -> to see list of databases in mongodb 
+use database_name -> to select database from list
+show collections -> to see list of collections(like tables in mysql) in the selected database 
+db.collection_name.find() -> to see list of documents in the selected collection  
