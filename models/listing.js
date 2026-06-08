@@ -8,10 +8,20 @@ const listingSchema = new Schema({
   },
   description: String,
   image: {
-    type: String,
-    required: true,
-    default: "https://cdn.pixabay.com/photo/2025/09/07/14/57/evil-queen-9820638_1280.jpg",
-    set: (default_value) => default_value ===  "" ? "https://cdn.pixabay.com/photo/2025/09/07/14/57/evil-queen-9820638_1280.jpg" : default_value
+    filename: {
+      type: String,
+      default: "ListingImage",
+    },
+    url: {
+      type: String,
+      required: true,
+      default:
+        "https://cdn.pixabay.com/photo/2025/09/07/14/57/evil-queen-9820638_1280.jpg",
+      set: (default_value) =>
+        default_value === "" || !default_value
+          ? "https://cdn.pixabay.com/photo/2025/09/07/14/57/evil-queen-9820638_1280.jpg"
+          : default_value,
+    },
   },
   location: String,
   price: Number,
