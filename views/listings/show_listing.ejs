@@ -9,9 +9,13 @@
     <ul>
         <li><%=find_listing_by_id.title%></li>
         <li><%=find_listing_by_id.description%></li>
-        <li>&#x20B9;<%=find_listing_by_id.price.toLocalString("en-IN")%></li>
+        <li>&#x20B9;<%=find_listing_by_id.price.toLocaleString("en-IN")%></li>
         <li><%=find_listing_by_id.location%></li>
         <li><%=find_listing_by_id.country%></li>
     </ul>
+    <br>
+    <a href="/EditListing/<%findfind_listing_by_id._id%>/edit">Edit Listing</a>
+    <br>
+    <a href="/DeleteListing/<%findfind_listing_by_id._id%>/delete">Delete Listing</a>
 </body>
 </html>

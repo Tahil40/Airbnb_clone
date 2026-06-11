@@ -71,6 +71,48 @@ app.get("/listing/:id", async (req, res) => {
   res.render("listings/show_listing.ejs", {find_listing_by_id});
 });
 
+app.get("/listings/new", async (req, res) => {
+  res.render("listings/new.ejs");
+});
+
+app.post("/listings", async (req, res) => {
+  // one way of accessing data from form....
+  const { title, description, image, price, location, country } = req.body;
+  // console.log(title, description, image, price, location, country);
+  
+  // second way of accessing data from form....
+  // const form_data = req.body.listing_value;  
+  // console.log(form_data);
+  // res.render("listings/new.ejs");
+
+  let SavelistingToDatabase = new listingSchema({
+      title: title,
+      description: description,
+      location: image,
+      price: price,
+      country: country
+  });
+  await SavelistingToDatabase.save();
+
+  res.redirect("/get-listings");
+});
+
+app.get("/EditListing/:id/edit", async (req, res) => {
+  const { id } = req.params; 
+  let find_listing_by_id = await listingSchema.findById(id);
+
+  res.render("listings/edit_listing", {find_listing_by_id});
+});
+
+app.put("", async (req, res) => {
+  
+});
+
+app.delete("/DeleteListing/:id/delete", async (req, res) => {
+  const { id } = req.params; 
+  let find_listing_by_id = await listingSchema.findById(id);
+});
+
 app.listen(port, () => {
   console.log(`The App is Listining at Port: ${port}`);
 });
