@@ -5,10 +5,15 @@ const { ConnectToMongoDB } = require("./util/mongoose");
 const listingSchema = require("./models/listing");
 const { InitDB } = require("./util/initDB");
 const path = require("path");
+const methodoverride = require("method-override");
+const ejs_mate = require("ejs-mate");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use(express.urlencoded({extends: true}));
+app.use(express.urlencoded({ extends: true }));
+app.use(methodoverride("_method"));
+app.engine("ejs", ejs_mate);
+app.use(express.static(path.join(__dirname, "/public")));
 
 // connecting to Database....
 ConnectToMongoDB()
@@ -65,10 +70,10 @@ app.get("/test_listing", async (req, res) => {
 });
 
 app.get("/listing/:id", async (req, res) => {
-  const { id } = req.params; 
+  const { id } = req.params;
   let find_listing_by_id = await listingSchema.findById(id);
   // res.send(find_listing_by_id);
-  res.render("listings/show_listing.ejs", {find_listing_by_id});
+  res.render("listings/show_listing.ejs", { find_listing_by_id });
 });
 
 app.get("/listings/new", async (req, res) => {
@@ -79,18 +84,19 @@ app.post("/listings", async (req, res) => {
   // one way of accessing data from form....
   const { title, description, image, price, location, country } = req.body;
   // console.log(title, description, image, price, location, country);
-  
+
   // second way of accessing data from form....
-  // const form_data = req.body.listing_value;  
+  // const form_data = req.body.listing_value;
   // console.log(form_data);
   // res.render("listings/new.ejs");
 
   let SavelistingToDatabase = new listingSchema({
-      title: title,
-      description: description,
-      location: image,
-      price: price,
-      country: country
+    title: title,
+    description: description,
+    image: image,
+    price: price,
+    country: country,
+    location: location
   });
   await SavelistingToDatabase.save();
 
@@ -98,19 +104,33 @@ app.post("/listings", async (req, res) => {
 });
 
 app.get("/EditListing/:id/edit", async (req, res) => {
-  const { id } = req.params; 
+  const { id } = req.params;
   let find_listing_by_id = await listingSchema.findById(id);
 
-  res.render("listings/edit_listing", {find_listing_by_id});
+  res.render("listings/edit_listing", { find_listing_by_id });
 });
 
-app.put("", async (req, res) => {
-  
+app.put("/edit_listing/:id", async (req, res) => {
+  const { id } = req.params;
+  const { title, description, image, price, location, country } = req.body;
+  await listingSchema.findByIdAndUpdate(id, {
+    title: title,
+    description: description,
+    image: image,
+    price: price,
+    country: country,
+    location: location
+  });
+
+  res.redirect(`/EditListing/${id}/edit`);
 });
 
 app.delete("/DeleteListing/:id/delete", async (req, res) => {
-  const { id } = req.params; 
-  let find_listing_by_id = await listingSchema.findById(id);
+  const { id } = req.params;
+  const delete_response = await listingSchema.findByIdAndDelete(id);
+  console.log("Listing hass been successfully deleted; ", delete_response);
+
+  res.redirect("/get-listings");
 });
 
 app.listen(port, () => {

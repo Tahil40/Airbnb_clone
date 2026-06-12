@@ -14,8 +14,10 @@
         <li><%=find_listing_by_id.country%></li>
     </ul>
     <br>
-    <a href="/EditListing/<%findfind_listing_by_id._id%>/edit">Edit Listing</a>
-    <br>
-    <a href="/DeleteListing/<%findfind_listing_by_id._id%>/delete">Delete Listing</a>
+    <a href="/EditListing/<%=find_listing_by_id._id%>/edit">Edit Listing</a>
+    <br><br>
+    <form action="/DeleteListing/<%=find_listing_by_id._id%>/delete?_method=DELETE" method="POST">
+        <button>Delete This Listing</button>
+    </form>
 </body>
 </html>

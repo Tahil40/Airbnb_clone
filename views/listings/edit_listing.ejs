@@ -8,23 +8,22 @@
 </head>
 
 <body>
-    <form action="/edit_listing" method="POST">
+    <form action="/edit_listing/<%=find_listing_by_id._id%>?_method=PUT" method="POST">
         <h1>Edit Listing</h1>
         <br>
-        <input name="title" placeholder="Enter Title" type="text">
+        <input name="title" value="<%=find_listing_by_id.title%>" type="text">
         <br><br>
-        <textarea name="description" placeholder="Enter Description"></textarea>
+        <textarea name="description"><%=find_listing_by_id.description%></textarea>
         <br><br>
-        <input name="image" placeholder="Enter Image URL/Link" type="text">
+        <input name="image" value="<%=find_listing_by_id.image%>" type="text">
         <br><br>
-        <input type="number" placeholder="Enter Price" name="price">
+        <input type="number" value="<%=find_listing_by_id.price%>" name="price">
         <br><br>
-        <input type="text" placeholder="Enter Location" name="location">
+        <input type="text" value="<%=find_listing_by_id.location%>" name="location">
         <br><br>
-        <input type="text" placeholder="Enter Counrty" name="country">
+        <input type="text" value="<%=find_listing_by_id.country%>" name="country">
         <br><br>
         <button>Add</button>
     </form>
 </body>
-
 </html>
