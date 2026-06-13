@@ -1,34 +1,36 @@
 <% layout("/layouts/boilerplate") %>
     <body>
-        <form action="/listings" method="POST">
+        <form action="/listings" method="POST" class="needs-validation" nonvalidate>
             <div class="row mt-3">
                 <div class="col-8 offset-2">
                     <h1>Create New Listing</h1>
                     <div class="mb-3">
                         <label for="title" class="form-label">Title</label>
-                        <input name="title" placeholder="Enter Title" type="text" class="form-control">
+                        <input name="title" placeholder="Enter Title" type="text" class="form-control" required>
+                        <div class="valid-feedback">Title is good</div>
                     </div>
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
-                        <textarea name="description" placeholder="Enter Description" class="form-control"></textarea>
+                        <textarea name="description" placeholder="Enter Description" class="form-control" required></textarea>
                     </div>
                     <div class="mb-3">
                         <label for="image" class="form-label">Image</label>
-                        <input name="image" placeholder="Enter Image URL/Link" type="text" class="form-control">
+                        <input name="image" placeholder="Enter Image URL/Link" type="text" class="form-control" required>
+                        <div class="invalid-feedback">Enter a Valid Image</div>
                     </div>
                     <div class="row">
                         <div class="mb-3 col-md-4">
                             <label for="price" class="form-label">Price</label>
-                            <input type="number" placeholder="Enter Price" name="price" class="form-control">
+                            <input type="number" placeholder="Enter Price" name="price" class="form-control" required>
                         </div>
                         <div class="mb-3 col-md-8">
                             <label for="location" class="form-label">Location</label>
-                            <input type="text" placeholder="Enter Location" name="location" class="form-control">
+                            <input type="text" placeholder="Enter Location" name="location" class="form-control" required>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label for="country" class="form-label">Country</label>
-                        <input type="text" placeholder="Enter Counrty" name="country" class="form-control">
+                        <input type="text" placeholder="Enter Counrty" name="country" class="form-control" required>
                     </div>
                     <!-- <input name="listing_value[title]" placeholder="Enter Title" type="text">
         <br><br>
@@ -46,3 +48,4 @@
             </div>
         </form>
     </body>
+    <script src="/logic/bootstrap_validation_logic.js"></script>

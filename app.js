@@ -7,6 +7,7 @@ const { InitDB } = require("./util/initDB");
 const path = require("path");
 const methodoverride = require("method-override");
 const ejs_mate = require("ejs-mate");
+const wrapAsync = require("./util/wrapAsync");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -26,6 +27,11 @@ ConnectToMongoDB()
 
 // initialize database....
 InitDB();
+
+// define middleware....
+app.use((err, req, res, next) => {
+  res.send("Something wents wrong");
+});
 
 // define get request
 app.get("/", (req, res) => {
@@ -69,39 +75,46 @@ app.get("/test_listing", async (req, res) => {
   // res.send("Data Successfully Saved to database");
 });
 
-app.get("/listing/:id", async (req, res) => {
-  const { id } = req.params;
-  let find_listing_by_id = await listingSchema.findById(id);
-  // res.send(find_listing_by_id);
-  res.render("listings/show_listing.ejs", { find_listing_by_id });
+app.get("/listing/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    let find_listing_by_id = await listingSchema.findById(id);
+    // res.send(find_listing_by_id);
+    res.render("listings/show_listing.ejs", { find_listing_by_id });
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.get("/listings/new", async (req, res) => {
   res.render("listings/new.ejs");
 });
 
-app.post("/listings", async (req, res) => {
-  // one way of accessing data from form....
-  const { title, description, image, price, location, country } = req.body;
-  // console.log(title, description, image, price, location, country);
+app.post(
+  "/listings",
+  wrapAsync(async (req, res) => {
+    // one way of accessing data from form....
+    const { title, description, image, price, location, country } = req.body;
+    // console.log(title, description, image, price, location, country);
 
-  // second way of accessing data from form....
-  // const form_data = req.body.listing_value;
-  // console.log(form_data);
-  // res.render("listings/new.ejs");
+    // second way of accessing data from form....
+    // const form_data = req.body.listing_value;
+    // console.log(form_data);
+    // res.render("listings/new.ejs");
 
-  let SavelistingToDatabase = new listingSchema({
-    title: title,
-    description: description,
-    image: image,
-    price: price,
-    country: country,
-    location: location
-  });
-  await SavelistingToDatabase.save();
+    let SavelistingToDatabase = new listingSchema({
+      title: title,
+      description: description,
+      image: image,
+      price: price,
+      country: country,
+      location: location,
+    });
+    await SavelistingToDatabase.save();
 
-  res.redirect("/get-listings");
-});
+    res.redirect("/get-listings");
+  }),
+);
 
 app.get("/EditListing/:id/edit", async (req, res) => {
   const { id } = req.params;
@@ -119,7 +132,7 @@ app.put("/edit_listing/:id", async (req, res) => {
     image: image,
     price: price,
     country: country,
-    location: location
+    location: location,
   });
 
   res.redirect(`/EditListing/${id}/edit`);
