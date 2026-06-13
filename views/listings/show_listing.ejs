@@ -1,16 +1,39 @@
 <% layout("/layouts/boilerplate") %>
-<body>
-    <ul>
-        <li><%=find_listing_by_id.title%></li>
-        <li><%=find_listing_by_id.description%></li>
-        <li>&#x20B9;<%=find_listing_by_id.price.toLocaleString("en-IN")%></li>
-        <li><%=find_listing_by_id.location%></li>
-        <li><%=find_listing_by_id.country%></li>
-    </ul>
-    <br>
-    <a href="/EditListing/<%=find_listing_by_id._id%>/edit">Edit Listing</a>
-    <br><br>
-    <form action="/DeleteListing/<%=find_listing_by_id._id%>/delete?_method=DELETE" method="POST">
-        <button>Delete This Listing</button>
-    </form>
-</body>
+
+    <body>
+        <div class="row my-3">
+            <div class="col-8 offset-2">
+                <h3>Listing Details: </h3>
+                <div class="card">
+                    <img src="<%=find_listing_by_id.image.url%>" class="card-img-top show-image"
+                        alt="<%=find_listing_by_id.image.filename%>" style="height: 20rem;">
+                    <div class="card-body">
+                        <p class="card-text">
+                            <%=find_listing_by_id.title%>
+                        </p>
+                    </div>
+                </div>
+                <ul>
+                    <li>
+                        <%=find_listing_by_id.title%>
+                    </li>
+                    <li>
+                        <%=find_listing_by_id.description%>
+                    </li>
+                    <li>&#x20B9;<%=find_listing_by_id.price.toLocaleString("en-IN")%></li>
+                    <li>
+                        <%=find_listing_by_id.location%>
+                    </li>
+                    <li>
+                        <%=find_listing_by_id.country%>
+                    </li>
+                </ul>
+                <div class="mt-3" style="display: flex; gap: 1rem;">
+                    <a href="/EditListing/<%=find_listing_by_id._id%>/edit" class="btn btn-dark">Edit Listing</a>
+                    <form action="/DeleteListing/<%=find_listing_by_id._id%>/delete?_method=DELETE" method="POST">
+                        <button class="btn btn-danger">Delete This Listing</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </body>
