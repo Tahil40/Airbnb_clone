@@ -1,0 +1,34 @@
+.navbar{
+    height: 5rem;
+    background-color: white;
+}
+
+.fa-compass{
+    font-size: 2rem;
+    color: red;
+}
+
+.nav-link{
+    color: #222222 !important;
+}
+
+.footer_links a{
+    text-decoration: none;
+    color: #222222;
+}
+
+.footer_links a:hover{
+    text-decoration: underline;
+    color: blue;
+}
+
+.footer{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    height: 8rem;
+    background-color: #ebebeb;
+    font-size: 1.3rem;
+}
