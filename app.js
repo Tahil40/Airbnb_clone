@@ -8,6 +8,8 @@ const path = require("path");
 const methodoverride = require("method-override");
 const ejs_mate = require("ejs-mate");
 const wrapAsync = require("./util/wrapAsync");
+const ExpressError = require("./util/ExpressError");
+const ListingSchema = require("./util/ValidationSchema");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -28,9 +30,28 @@ ConnectToMongoDB()
 // initialize database....
 InitDB();
 
+const ValidateListing = (req, res, next) => {
+  const result = ListingSchema.validate(req.body);
+  if (result.error) {
+    let errorMessage = result.error.details.map((element)=>element.message).join(",");
+    console.log(errorMessage);
+    throw new ExpressError(400, result.error);
+  } else {
+    next();
+  }
+};
+
 // define middleware....
 app.use((err, req, res, next) => {
-  res.send("Something wents wrong");
+  let { statusCode = 500, message = "server error" } = err;
+  res.status(statusCode).render("layouts/error.ejs", { message });
+  // res.status(statusCode).send(message);
+  // res.send("Something wents wrong");
+});
+
+//if the request does not match with above routes then it will match with this route....
+app.all("*", (req, res, next) => {
+  next(new ExpressError(404, "Page Not Found"));
 });
 
 // define get request
@@ -92,7 +113,17 @@ app.get("/listings/new", async (req, res) => {
 
 app.post(
   "/listings",
+  ValidateListing,
   wrapAsync(async (req, res) => {
+    // it can also be apply on individual fields like -> req.body.field_name....
+    if (req.body === "undefined") {
+      throw new ExpressError(400, "Send valid data for listing");
+    }
+    let result = ListingSchema.validate(req.body);
+    if (result.error) {
+      throw new ExpressError(400, result.error);
+    }
+    console.log(result);
     // one way of accessing data from form....
     const { title, description, image, price, location, country } = req.body;
     // console.log(title, description, image, price, location, country);
