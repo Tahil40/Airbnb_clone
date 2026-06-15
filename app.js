@@ -9,7 +9,8 @@ const methodoverride = require("method-override");
 const ejs_mate = require("ejs-mate");
 const wrapAsync = require("./util/wrapAsync");
 const ExpressError = require("./util/ExpressError");
-const ListingSchema = require("./util/ValidationSchema");
+const { ListingSchema, ReviewsSchema } = require("./util/ValidationSchema");
+const reviews = require("./models/reviews");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -33,7 +34,22 @@ InitDB();
 const ValidateListing = (req, res, next) => {
   const result = ListingSchema.validate(req.body);
   if (result.error) {
-    let errorMessage = result.error.details.map((element)=>element.message).join(",");
+    let errorMessage = result.error.details
+      .map((element) => element.message)
+      .join(",");
+    console.log(errorMessage);
+    throw new ExpressError(400, result.error);
+  } else {
+    next();
+  }
+};
+
+const ValidateReviews = (req, res, next) => {
+  const result = ReviewsSchema.validate(req.body);
+  if (result.error) {
+    let errorMessage = result.error.details
+      .map((element) => element.message)
+      .join(",");
     console.log(errorMessage);
     throw new ExpressError(400, result.error);
   } else {
@@ -99,7 +115,10 @@ app.get("/test_listing", async (req, res) => {
 app.get("/listing/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
-    let find_listing_by_id = await listingSchema.findById(id);
+    // let find_listing_by_id = await listingSchema.findById(id);
+    let find_listing_by_id = await listingSchema
+      .findById(id)
+      .populate("reviews");
     // res.send(find_listing_by_id);
     res.render("listings/show_listing.ejs", { find_listing_by_id });
   } catch (error) {
@@ -176,6 +195,39 @@ app.delete("/DeleteListing/:id/delete", async (req, res) => {
 
   res.redirect("/get-listings");
 });
+
+app.post(
+  "/listings/:id/reviews",
+  ValidateReviews,
+  wrapAsync(async (req, res) => {
+    const { id } = req.params;
+    let find_listing_by_id = await listingSchema.findById(id);
+    const { review_rating, comment } = req.body;
+    let review = new reviews({
+      comment: comment,
+      rating: review_rating,
+    });
+    find_listing_by_id.reviews.push(review);
+
+    await review.save();
+    await find_listing_by_id.save();
+
+    console.log("Review Successfully Saved");
+    res.send("Review Successfully Saved");
+    // res.render("listings/show_listing.ejs", { find_listing_by_id });
+  }),
+);
+
+app.delete(
+  "/listings/:listing_id/reviews/:review_id",
+  wrapAsync(async (req, res) => {
+    const { listing_id, review_id } = req.body;
+    await listingSchema.findByIdAndUpdate(id, {$pull: {reviews: review_id}});
+    await reviews.findByIdAndDelete(review_id);
+    
+    res.redirect(`/listings/${listing_id}`);
+  }),
+);
 
 app.listen(port, () => {
   console.log(`The App is Listining at Port: ${port}`);

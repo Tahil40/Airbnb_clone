@@ -1,4 +1,4 @@
-npm init -y
+npm init -y or npm init 
 npm i nodemon
 npm i express
 npm i ejs 
@@ -9,3 +9,4 @@ dbs -> to see list of databases in mongodb
 use database_name -> to select database from list
 show collections -> to see list of collections(like tables in mysql) in the selected database 
 db.collection_name.find() -> to see list of documents in the selected collection  
+node index.js or node filename.js 

@@ -3,7 +3,9 @@
     <body>
         <div class="row my-3">
             <div class="col-8 offset-2">
-                <h3>Listing Details: </h3>
+                <h3>
+                    <%=find_listing_by_id.title%>
+                </h3>
                 <div class="card">
                     <img src="<%=find_listing_by_id.image.url%>" class="card-img-top show-image"
                         alt="<%=find_listing_by_id.image.filename%>" style="height: 20rem;">
@@ -14,9 +16,6 @@
                     </div>
                 </div>
                 <ul>
-                    <li>
-                        <%=find_listing_by_id.title%>
-                    </li>
                     <li>
                         <%=find_listing_by_id.description%>
                     </li>
@@ -33,6 +32,52 @@
                     <form action="/DeleteListing/<%=find_listing_by_id._id%>/delete?_method=DELETE" method="POST">
                         <button class="btn btn-danger">Delete This Listing</button>
                     </form>
+                </div>
+            </div>
+        </div>
+        <!-- reviews -->
+        <div class="col-8 offset-3">
+            <hr>
+            <h4>Leave a Review</h4>
+            <form action="/listings/<%=find_listing_by_id._id%>/reviews" method="POST" class="my-3 needs-validation"
+                novalidate>
+                <div class="my-2">
+                    <label for="rating" class="form-label">Rating</label>
+                    <input type="range" id="rating" name="review_rating" min="1" max="5" class="form-range">
+                </div>
+                <div class="my-3">
+                    <label for="comment" class="form-label">Comments</label>
+                    <textarea name="comment" id="comment" cols="30" rows="5" class="form-control"
+                        required>leave a comment</textarea>
+                </div>
+                <button class="btn btn-outline-dark"></button>
+            </form>
+            <hr>
+            <div class="my-3">
+                <h4>All Reviews</h4>
+                <!-- <p><%=find_listing_by_id.reviews%></p> -->
+                <!-- <ul>
+                <% for (items of find_listing_by_id.reviews) { %>
+                    <li><%= items.comment %>, <%= items.rating %> Stars</li>
+                <% } %>
+                </ul> -->
+                <div class="row">
+                    <% for (items of find_listing_by_id.reviews) { %>
+                        <div class="card col-5 ms-3 mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">User's Name</h5>
+                                <p class="card-text">
+                                    <%= items.comment %>
+                                </p>
+                                <p class="card-text">
+                                    <%= items.rating %> Stars
+                                </p>
+                            </div>
+                            <form action="/listings/<%=find_listing_by_id._id%>/reviews/<%=items._id%>?_method=DELETE" method="POST" class="mb-3">
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </div>
+                        <% } %>
                 </div>
             </div>
         </div>
