@@ -11,6 +11,9 @@ const wrapAsync = require("./util/wrapAsync");
 const ExpressError = require("./util/ExpressError");
 const { ListingSchema, ReviewsSchema } = require("./util/ValidationSchema");
 const reviews = require("./models/reviews");
+const listings = require("./routes/ListingRoutes.js");
+const session = require("express-session");
+const flash = require("connect-flash");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -18,6 +21,30 @@ app.use(express.urlencoded({ extends: true }));
 app.use(methodoverride("_method"));
 app.engine("ejs", ejs_mate);
 app.use(express.static(path.join(__dirname, "/public")));
+
+app.use((req, res, next) => {
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  // console.log(res.locals.success);
+  next();
+});
+
+// listing route....
+app.use("/listings", listings);
+
+const SessionOptions = {
+  secret: "session-secret", 
+  resave: false, 
+  saveUninitialized: true, 
+  cookie: {
+    expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  },
+};
+
+app.use(session(SessionOptions));
+app.use(flash());
 
 // connecting to Database....
 ConnectToMongoDB()
@@ -31,31 +58,31 @@ ConnectToMongoDB()
 // initialize database....
 InitDB();
 
-const ValidateListing = (req, res, next) => {
-  const result = ListingSchema.validate(req.body);
-  if (result.error) {
-    let errorMessage = result.error.details
-      .map((element) => element.message)
-      .join(",");
-    console.log(errorMessage);
-    throw new ExpressError(400, result.error);
-  } else {
-    next();
-  }
-};
+// const ValidateListing = (req, res, next) => {
+//   const result = ListingSchema.validate(req.body);
+//   if (result.error) {
+//     let errorMessage = result.error.details
+//       .map((element) => element.message)
+//       .join(",");
+//     console.log(errorMessage);
+//     throw new ExpressError(400, result.error);
+//   } else {
+//     next();
+//   }
+// };
 
-const ValidateReviews = (req, res, next) => {
-  const result = ReviewsSchema.validate(req.body);
-  if (result.error) {
-    let errorMessage = result.error.details
-      .map((element) => element.message)
-      .join(",");
-    console.log(errorMessage);
-    throw new ExpressError(400, result.error);
-  } else {
-    next();
-  }
-};
+// const ValidateReviews = (req, res, next) => {
+//   const result = ReviewsSchema.validate(req.body);
+//   if (result.error) {
+//     let errorMessage = result.error.details
+//       .map((element) => element.message)
+//       .join(",");
+//     console.log(errorMessage);
+//     throw new ExpressError(400, result.error);
+//   } else {
+//     next();
+//   }
+// };
 
 // define middleware....
 app.use((err, req, res, next) => {
@@ -75,16 +102,16 @@ app.get("/", (req, res) => {
   res.send("Welcome to Airbnb");
 });
 
-app.get("/get-listings", async (req, res) => {
-  try {
-    const response_data = await listingSchema.find({});
-    // console.log(response_data);
-    // res.send(response_data);
-    res.render("listings/index.ejs", { response_data });
-  } catch (error) {
-    console.log("Error; ", error);
-  }
-});
+// app.get("/get-listings", async (req, res) => {
+//   try {
+//     const response_data = await listingSchema.find({});
+//     // console.log(response_data);
+//     // res.send(response_data);
+//     res.render("listings/index.ejs", { response_data });
+//   } catch (error) {
+//     console.log("Error; ", error);
+//   }
+// });
 
 // if you don't use async and await then user .then() and catch() to read response from the server....
 // app.get("/get-listings", (req, res) => {
@@ -112,122 +139,122 @@ app.get("/test_listing", async (req, res) => {
   // res.send("Data Successfully Saved to database");
 });
 
-app.get("/listing/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    // let find_listing_by_id = await listingSchema.findById(id);
-    let find_listing_by_id = await listingSchema
-      .findById(id)
-      .populate("reviews");
-    // res.send(find_listing_by_id);
-    res.render("listings/show_listing.ejs", { find_listing_by_id });
-  } catch (error) {
-    next(error);
-  }
-});
+// app.get("/listing/:id", async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
+//     // let find_listing_by_id = await listingSchema.findById(id);
+//     let find_listing_by_id = await listingSchema
+//       .findById(id)
+//       .populate("reviews");
+//     // res.send(find_listing_by_id);
+//     res.render("listings/show_listing.ejs", { find_listing_by_id });
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
-app.get("/listings/new", async (req, res) => {
-  res.render("listings/new.ejs");
-});
+// app.get("/listings/new", async (req, res) => {
+//   res.render("listings/new.ejs");
+// });
 
-app.post(
-  "/listings",
-  ValidateListing,
-  wrapAsync(async (req, res) => {
-    // it can also be apply on individual fields like -> req.body.field_name....
-    if (req.body === "undefined") {
-      throw new ExpressError(400, "Send valid data for listing");
-    }
-    let result = ListingSchema.validate(req.body);
-    if (result.error) {
-      throw new ExpressError(400, result.error);
-    }
-    console.log(result);
-    // one way of accessing data from form....
-    const { title, description, image, price, location, country } = req.body;
-    // console.log(title, description, image, price, location, country);
+// app.post(
+//   "/listings",
+//   ValidateListing,
+//   wrapAsync(async (req, res) => {
+//     // it can also be apply on individual fields like -> req.body.field_name....
+//     if (req.body === "undefined") {
+//       throw new ExpressError(400, "Send valid data for listing");
+//     }
+//     let result = ListingSchema.validate(req.body);
+//     if (result.error) {
+//       throw new ExpressError(400, result.error);
+//     }
+//     console.log(result);
+//     // one way of accessing data from form....
+//     const { title, description, image, price, location, country } = req.body;
+//     // console.log(title, description, image, price, location, country);
 
-    // second way of accessing data from form....
-    // const form_data = req.body.listing_value;
-    // console.log(form_data);
-    // res.render("listings/new.ejs");
+//     // second way of accessing data from form....
+//     // const form_data = req.body.listing_value;
+//     // console.log(form_data);
+//     // res.render("listings/new.ejs");
 
-    let SavelistingToDatabase = new listingSchema({
-      title: title,
-      description: description,
-      image: image,
-      price: price,
-      country: country,
-      location: location,
-    });
-    await SavelistingToDatabase.save();
+//     let SavelistingToDatabase = new listingSchema({
+//       title: title,
+//       description: description,
+//       image: image,
+//       price: price,
+//       country: country,
+//       location: location,
+//     });
+//     await SavelistingToDatabase.save();
 
-    res.redirect("/get-listings");
-  }),
-);
+//     res.redirect("/get-listings");
+//   }),
+// );
 
-app.get("/EditListing/:id/edit", async (req, res) => {
-  const { id } = req.params;
-  let find_listing_by_id = await listingSchema.findById(id);
+// app.get("/EditListing/:id/edit", async (req, res) => {
+//   const { id } = req.params;
+//   let find_listing_by_id = await listingSchema.findById(id);
 
-  res.render("listings/edit_listing", { find_listing_by_id });
-});
+//   res.render("listings/edit_listing", { find_listing_by_id });
+// });
 
-app.put("/edit_listing/:id", async (req, res) => {
-  const { id } = req.params;
-  const { title, description, image, price, location, country } = req.body;
-  await listingSchema.findByIdAndUpdate(id, {
-    title: title,
-    description: description,
-    image: image,
-    price: price,
-    country: country,
-    location: location,
-  });
+// app.put("/edit_listing/:id", async (req, res) => {
+//   const { id } = req.params;
+//   const { title, description, image, price, location, country } = req.body;
+//   await listingSchema.findByIdAndUpdate(id, {
+//     title: title,
+//     description: description,
+//     image: image,
+//     price: price,
+//     country: country,
+//     location: location,
+//   });
 
-  res.redirect(`/EditListing/${id}/edit`);
-});
+//   res.redirect(`/EditListing/${id}/edit`);
+// });
 
-app.delete("/DeleteListing/:id/delete", async (req, res) => {
-  const { id } = req.params;
-  const delete_response = await listingSchema.findByIdAndDelete(id);
-  console.log("Listing hass been successfully deleted; ", delete_response);
+// app.delete("/DeleteListing/:id/delete", async (req, res) => {
+//   const { id } = req.params;
+//   const delete_response = await listingSchema.findByIdAndDelete(id);
+//   console.log("Listing hass been successfully deleted; ", delete_response);
 
-  res.redirect("/get-listings");
-});
+//   res.redirect("/get-listings");
+// });
 
-app.post(
-  "/listings/:id/reviews",
-  ValidateReviews,
-  wrapAsync(async (req, res) => {
-    const { id } = req.params;
-    let find_listing_by_id = await listingSchema.findById(id);
-    const { review_rating, comment } = req.body;
-    let review = new reviews({
-      comment: comment,
-      rating: review_rating,
-    });
-    find_listing_by_id.reviews.push(review);
+// app.post(
+//   "/listings/:id/reviews",
+//   ValidateReviews,
+//   wrapAsync(async (req, res) => {
+//     const { id } = req.params;
+//     let find_listing_by_id = await listingSchema.findById(id);
+//     const { review_rating, comment } = req.body;
+//     let review = new reviews({
+//       comment: comment,
+//       rating: review_rating,
+//     });
+//     find_listing_by_id.reviews.push(review);
 
-    await review.save();
-    await find_listing_by_id.save();
+//     await review.save();
+//     await find_listing_by_id.save();
 
-    console.log("Review Successfully Saved");
-    res.send("Review Successfully Saved");
-    // res.render("listings/show_listing.ejs", { find_listing_by_id });
-  }),
-);
+//     console.log("Review Successfully Saved");
+//     res.send("Review Successfully Saved");
+//     // res.render("listings/show_listing.ejs", { find_listing_by_id });
+//   }),
+// );
 
-app.delete(
-  "/listings/:listing_id/reviews/:review_id",
-  wrapAsync(async (req, res) => {
-    const { listing_id, review_id } = req.body;
-    await listingSchema.findByIdAndUpdate(id, {$pull: {reviews: review_id}});
-    await reviews.findByIdAndDelete(review_id);
+// app.delete(
+//   "/listings/:listing_id/reviews/:review_id",
+//   wrapAsync(async (req, res) => {
+//     const { listing_id, review_id } = req.body;
+//     await listingSchema.findByIdAndUpdate(id, {$pull: {reviews: review_id}});
+//     await reviews.findByIdAndDelete(review_id);
     
-    res.redirect(`/listings/${listing_id}`);
-  }),
-);
+//     res.redirect(`/listings/${listing_id}`);
+//   }),
+// );
 
 app.listen(port, () => {
   console.log(`The App is Listining at Port: ${port}`);
