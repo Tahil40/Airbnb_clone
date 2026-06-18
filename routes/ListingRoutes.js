@@ -5,6 +5,7 @@ const wrapAsync = require("../util/wrapAsync");
 const ExpressError = require("../util/ExpressError");
 const { ListingSchema, ReviewsSchema } = require("../util/ValidationSchema");
 const reviews = require("../models/reviews");
+const { isLoggedIn } = require("../middleware.js");
 
 const ValidateListing = (req, res, next) => {
   const result = ListingSchema.validate(req.body);
@@ -62,8 +63,13 @@ router.get("/listing/:id", async (req, res, next) => {
     next(error);
   }
 });
-
-router.get("/listings/new", async (req, res) => {
+ 
+router.get("/listings/new", isLoggedIn, (req, res) => {
+  // console.log(req.user);
+  // if(!req.isAuthenticated()){
+  //   req.flash("error", "You must be logged in!");
+  //   return res.redirect("/login");
+  // }; 
   res.render("listings/new.ejs");
 });
 
@@ -170,5 +176,13 @@ router.delete(
     res.redirect(`/listings/${listing_id}`);
   }),
 );
+
+router.get("/logout", (req, res, next) => {
+  req.logout((err) => {
+    return next(err);
+  });
+  req.flash("success", "You are successfully logged out!");
+  res.redirect("/listings");
+});
 
 module.exports = router;

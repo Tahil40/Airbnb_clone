@@ -14,6 +14,10 @@ const reviews = require("./models/reviews");
 const listings = require("./routes/ListingRoutes.js");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const passport_local = require("passport-local");
+const UserSchema = require("./models/user.js");
+const user_router = require("./routes/UserRoutes.js");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -31,11 +35,12 @@ app.use((req, res, next) => {
 
 // listing route....
 app.use("/listings", listings);
+app.use("/user", user_router);
 
 const SessionOptions = {
-  secret: "session-secret", 
-  resave: false, 
-  saveUninitialized: true, 
+  secret: "session-secret",
+  resave: false,
+  saveUninitialized: true,
   cookie: {
     expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
     maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -45,6 +50,12 @@ const SessionOptions = {
 
 app.use(session(SessionOptions));
 app.use(flash());
+
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new passport_local(UserSchema.authenticate()));
+passport.serializeUser(UserSchema.serializeUser());
+passport.deserializeUser(UserSchema.deserializeUser());
 
 // connecting to Database....
 ConnectToMongoDB()
@@ -57,6 +68,16 @@ ConnectToMongoDB()
 
 // initialize database....
 InitDB();
+
+app.get("/demouser", async (req, res) => {
+  const fakeUser = new UserSchema({
+    email: "fakeuser@gmail.com",
+    username: "fakeuser",
+  });
+
+  const register_user = await UserSchema.register(fakeUser, "givepasswordhere");
+  res.send(register_user);
+});
 
 // const ValidateListing = (req, res, next) => {
 //   const result = ListingSchema.validate(req.body);
@@ -251,7 +272,7 @@ app.get("/test_listing", async (req, res) => {
 //     const { listing_id, review_id } = req.body;
 //     await listingSchema.findByIdAndUpdate(id, {$pull: {reviews: review_id}});
 //     await reviews.findByIdAndDelete(review_id);
-    
+
 //     res.redirect(`/listings/${listing_id}`);
 //   }),
 // );
